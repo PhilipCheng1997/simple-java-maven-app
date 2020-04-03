@@ -1,0 +1,27 @@
+pipeline {
+   agent any
+
+   stages {
+      stage('拉取代码') {
+         steps {
+            checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '59a1d023-971d-4d89-b45d-c22fc302e3b4', url: 'git@github.com:PhilipCheng1997/simple-java-maven-app.git']]])
+         }
+      }
+      stage('构建代码') {
+         steps {
+            sh 'mvn clean install'
+         }
+      }
+      stage('运行代码') {
+         steps {
+            sh 'java -jar target/my-app-1.0-SNAPSHOT.jar'
+         }
+      }
+   }
+   post {
+      always {
+        emailext body: '''$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS:
+        Check console output at $BUILD_URL to view the results.''', subject: '$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS!', to: '15113090486@163.com'
+      }
+    }
+}
